@@ -5,6 +5,7 @@ auth.onAuthStateChanged(user => {
     loginScreen.classList.add("hidden");
     adminDashboard.classList.remove("hidden");
     adminControls.classList.remove("hidden");
+    loginScreen.style.display = "none";
   } else {
     loginScreen.classList.remove("hidden");
     adminDashboard.classList.add("hidden");
@@ -198,3 +199,4 @@ function deleteUser(id) {
     db.collection("users").doc(id).delete();
   }
 }
+
