@@ -1,13 +1,8 @@
 /* ---------- AUTH ---------- */
 
 auth.onAuthStateChanged(user => {
-  if (user) {
-    loginScreen.classList.add("hidden");
-    app.classList.remove("hidden");
-  } else {
-    loginScreen.classList.remove("hidden");
-    app.classList.add("hidden");
-  }
+  loginScreen.classList.toggle("hidden", !!user);
+  app.classList.toggle("hidden", !user);
 });
 
 function login() {
@@ -30,25 +25,41 @@ function addUser() {
   });
 }
 
-/* ---------- BOOKS ---------- */
+/* ---------- BOOKS (FIXED) ---------- */
 
 function addBook() {
   const file = bimage.files[0];
-  const ref = storage.ref("books/" + Date.now());
 
-  ref.put(file).then(() =>
-    ref.getDownloadURL().then(url =>
-      db.collection("books").add({
-        title: btitle.value,
-        author: bauthor.value,
-        category: bcategory.value,
-        owner: bowner.value,
-        image: url,
-        status: "Available",
-        issuedTo: null
-      })
-    )
-  );
+  if (!file) {
+    alert("Please take or select a book image");
+    return;
+  }
+
+  const bookData = {
+    title: btitle.value,
+    author: bauthor.value,
+    category: bcategory.value,
+    owner: bowner.value,
+    status: "Available",
+    issuedTo: null
+  };
+
+  const imageRef = storage.ref("books/" + Date.now());
+
+  imageRef.put(file)
+    .then(() => imageRef.getDownloadURL())
+    .then(url => {
+      bookData.image = url;
+      return db.collection("books").add(bookData);
+    })
+    .then(() => {
+      alert("Book added successfully");
+      bimage.value = "";
+    })
+    .catch(err => {
+      alert("Failed to add book");
+      console.error(err);
+    });
 }
 
 /* ---------- CHECKOUT / CHECKIN ---------- */
@@ -58,7 +69,7 @@ async function checkoutBook(bookId) {
   const freeUser = users.docs.find(u => u.data().activeBook === null);
 
   if (!freeUser) {
-    alert("No available user (1 book per user rule)");
+    alert("No user available (1 book per user)");
     return;
   }
 
@@ -93,13 +104,11 @@ let allBooks = [];
 
 function searchBooks() {
   const term = searchInput.value.toLowerCase();
-  renderBooks(
-    allBooks.filter(b =>
-      b.title.toLowerCase().includes(term) ||
-      b.author.toLowerCase().includes(term) ||
-      b.category.toLowerCase().includes(term)
-    )
-  );
+  renderBooks(allBooks.filter(b =>
+    b.title.toLowerCase().includes(term) ||
+    b.author.toLowerCase().includes(term) ||
+    b.category.toLowerCase().includes(term)
+  ));
 }
 
 /* ---------- RENDER ---------- */
@@ -112,9 +121,7 @@ function renderBooks(books) {
         <img src="${b.image}" class="h-40 w-full object-cover rounded-xl">
         <h3 class="font-semibold mt-2">${b.title}</h3>
         <p class="text-sm text-gray-500">${b.author}</p>
-        <span class="text-sm ${b.status === "Available" ? "text-green-500" : "text-red-500"}">
-          ${b.status}
-        </span>
+        <span class="text-sm ${b.status === "Available" ? "text-green-500" : "text-red-500"}">${b.status}</span>
 
         <div class="mt-3 space-y-2">
           ${
@@ -122,9 +129,7 @@ function renderBooks(books) {
             ? `<button onclick="checkoutBook('${b.id}')" class="btn w-full">Checkout</button>`
             : `<button onclick="checkinBook('${b.id}','${b.issuedTo}')" class="btn w-full bg-gray-500">Check-in</button>`
           }
-          <button onclick="deleteBook('${b.id}')" class="text-red-500 text-sm w-full">
-            Delete Book
-          </button>
+          <button onclick="deleteBook('${b.id}')" class="text-red-500 text-sm w-full">Delete Book</button>
         </div>
       </div>
     `;
@@ -147,10 +152,9 @@ db.collection("books").onSnapshot(snapshot => {
   totalBooks.innerText = allBooks.length;
   availableBooks.innerText = available;
   checkedOutBooks.innerText = issued;
-
   renderBooks(allBooks);
 });
 
-db.collection("users").onSnapshot(snap =>
-  totalUsers.innerText = snap.size
-);
+db.collection("users").onSnapshot(snap => {
+  totalUsers.innerText = snap.size;
+});
