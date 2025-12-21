@@ -1,148 +1,195 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>GRLE (Green Ridge Library For Evenyone)</title>
+  <meta charset="UTF-8" />
+  <title>Community Library</title>
 
-  <!-- IMPORTANT FOR MOBILE -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Mobile first -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Firebase -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
+  <!-- App scripts -->
   <script defer src="firebase.js"></script>
   <script defer src="app.js"></script>
 </head>
 
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-100">
 
-<h1 class="text-center text-white text-2xl font-semibold mb-6">
-  GRLE (Green Ridge Library For Evenyone)
-</h1>
-<p class="text-center text-indigo-100 mb-8">
-  Admin access for managing books & members
-</p>
-  
-<!-- LOGIN -->
-<div id="loginScreen" class="bg-gradient-to-br from-indigo-600 to-purple-600 py-16 px-4">
-<div class="bg-white/95 backdrop-blur p-6 rounded-2xl shadow-xl w-full max-w-sm mx-auto">
-    <h2 class="text-xl font-semibold text-center mb-4">Admin Login</h2>
-    <input id="email" class="input" placeholder="Email">
-    <input id="password" type="password" class="input" placeholder="Password">
-    <button onclick="login()" class="btn w-full mt-4">Login</button>
-    <p id="loginError" class="text-red-500 text-sm text-center mt-2 hidden">
+<!-- ================= HERO / ADMIN ENTRY ================= -->
+<div id="loginScreen"
+  class="bg-gradient-to-br from-indigo-600 to-purple-600 py-14 px-4 text-center">
+
+  <h1 class="text-white text-3xl font-semibold">
+    📚 GRLE (Green Ridge Library For Everyone)
+  </h1>
+  <p class="text-indigo-100 mt-2 mb-6">
+    Browse books • Manage community library
+  </p>
+
+  <button onclick="openLoginModal()"
+    class="bg-white text-indigo-600 font-medium px-6 py-3 rounded-full shadow">
+    Admin Login
+  </button>
+</div>
+
+<!-- ================= PUBLIC / ADMIN APP ================= -->
+<div id="app">
+
+  <!-- HEADER (Visible only for Admin after login) -->
+  <div id="adminHeader" class="bg-white shadow hidden sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+      <h2 class="font-semibold">Admin Panel</h2>
+      <button onclick="logout()" class="text-red-500 text-sm">
+        Logout
+      </button>
+    </div>
+  </div>
+
+  <div class="max-w-6xl mx-auto p-4 space-y-4">
+
+    <!-- ================= DASHBOARD (ADMIN ONLY) ================= -->
+    <div id="adminDashboard"
+      class="grid grid-cols-2 md:grid-cols-4 gap-4 hidden">
+      <div class="card">
+        <p>Total Books</p>
+        <h2 id="totalBooks">0</h2>
+      </div>
+      <div class="card">
+        <p>Available</p>
+        <h2 id="availableBooks">0</h2>
+      </div>
+      <div class="card">
+        <p>Checked Out</p>
+        <h2 id="checkedOutBooks">0</h2>
+      </div>
+      <div class="card">
+        <p>Users</p>
+        <h2 id="totalUsers">0</h2>
+      </div>
+    </div>
+
+    <!-- ================= ADMIN CONTROLS ================= -->
+    <div id="adminControls" class="hidden space-y-6">
+
+      <!-- Add User -->
+      <div class="bg-white p-4 rounded-2xl shadow space-y-3">
+        <h3 class="font-semibold">👤 Add Member</h3>
+        <input id="uname" class="input" placeholder="Name" />
+        <input id="uphone" class="input" placeholder="Phone" />
+        <input id="uflat" class="input" placeholder="Flat No" />
+        <button onclick="addUser()" class="btn w-full">
+          Add User
+        </button>
+      </div>
+
+      <!-- User List -->
+      <div class="bg-white p-4 rounded-2xl shadow">
+        <h3 class="font-semibold mb-3">👥 Users</h3>
+        <div id="userList" class="divide-y"></div>
+      </div>
+
+      <!-- Add Book -->
+      <div class="bg-white p-4 rounded-2xl shadow space-y-3">
+        <h3 class="font-semibold">➕ Add Book</h3>
+        <input id="btitle" class="input" placeholder="Book Title" />
+        <input id="bauthor" class="input" placeholder="Author" />
+        <input id="bcategory" class="input" placeholder="Category" />
+        <input id="bowner" class="input" placeholder="Donated By / Library" />
+
+        <input
+          id="bimage"
+          type="file"
+          accept="image/*"
+          capture="environment"
+          class="w-full"
+        />
+
+        <button onclick="addBook()" class="btn w-full">
+          Add Book
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= SEARCH (PUBLIC) ================= -->
+    <input
+      id="searchInput"
+      oninput="searchBooks()"
+      class="w-full p-4 rounded-2xl shadow bg-white"
+      placeholder="🔍 Search books"
+    />
+
+    <!-- ================= BOOK LIST ================= -->
+    <h3 class="font-semibold">📚 Available Books</h3>
+    <div id="bookList"
+      class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= LOGIN MODAL ================= -->
+<div id="loginModal"
+  class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+
+  <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+    <h2 class="text-lg font-semibold text-center mb-4">
+      Admin Login
+    </h2>
+
+    <input id="email" class="input" placeholder="Email" />
+    <input id="password" type="password"
+      class="input mt-3" placeholder="Password" />
+
+    <button onclick="login()" class="btn w-full mt-4">
+      Login
+    </button>
+
+    <button onclick="closeLoginModal()"
+      class="w-full mt-3 text-gray-500 text-sm">
+      Cancel
+    </button>
+
+    <p id="loginError"
+      class="text-red-500 text-sm text-center mt-2 hidden">
       Invalid login
     </p>
   </div>
 </div>
 
-<div class="bg-gray-100 py-6 text-center text-gray-500 text-sm">
-  📚 Browse available books below
-</div>
-  
-<!-- APP -->
-<div id="app">
-
-<!-- HEADER -->
-<div class="bg-white sticky top-0 shadow">
-  <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between">
-    <h1 class="font-semibold">📚 GRLE (Green Ridge Library For Evenyone)</h1>
-    <button onclick="logout()" class="text-red-500">Logout</button>
-  </div>
-</div>
-
-<div class="max-w-6xl mx-auto p-4 space-y-4">
-
-<!-- DASHBOARD -->
-<div id="adminDashboard" class="grid grid-cols-2 gap-4 md:grid-cols-4 hidden">
-  <div class="card"><p>Total Books</p><h2 id="totalBooks">0</h2></div>
-  <div class="card"><p>Available</p><h2 id="availableBooks">0</h2></div>
-  <div class="card"><p>Checked Out</p><h2 id="checkedOutBooks">0</h2></div>
-  <div class="card"><p>Users</p><h2 id="totalUsers">0</h2></div>
-</div>
-
-<!-- SEARCH -->
-<input id="searchInput" oninput="searchBooks()"
-  class="w-full p-4 rounded-2xl shadow bg-white"
-  placeholder="🔍 Search books">
-
-<div id="adminControls" class="hidden space-y-6">
- 
-<!-- ADD USER -->
-<div class="bg-white p-4 rounded-2xl shadow space-y-3">
-  <h2 class="font-semibold">👤 Add Member</h2>
-  <input id="uname" class="input" placeholder="Name">
-  <input id="uphone" class="input" placeholder="Phone">
-  <input id="uflat" class="input" placeholder="Flat No">
-  <button onclick="addUser()" class="btn w-full">Add User</button>
-</div>
-
-<h2 class="font-semibold">👥 Users</h2>
-<div id="userList" class="bg-white rounded-2xl shadow divide-y"></div>  
-  
-<!-- ADD BOOK -->
-<div class="bg-white p-4 rounded-2xl shadow space-y-3">
-  <h2 class="font-semibold">➕ Add Book</h2>
-  <input id="btitle" class="input" placeholder="Title">
-  <input id="bauthor" class="input" placeholder="Author">
-  <input id="bcategory" class="input" placeholder="Category">
-  <input id="bowner" class="input" placeholder="Donated By / Library">
-</div>
-
-  
-  <!-- MOBILE CAMERA FRIENDLY -->
-  <input
-    type="file"
-    id="bimage"
-    accept="image/*"
-    capture="environment"
-    class="w-full"
-  >
-
-  <button onclick="addBook()" class="btn w-full">Add Book</button>
-</div>
-
-<!-- BOOK LIST -->
-<h2 class="font-semibold">📚 Books</h2>
-<div id="bookList" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
-
-</div>
-</div>
-
+<!-- ================= STYLES ================= -->
 <style>
-.input {
-  width: 100%;
-  padding: 14px;
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
-}
-.btn {
-  background: #6366f1;
-  color: white;
-  padding: 14px;
-  border-radius: 18px;
-  font-weight: 500;
-}
-.card {
-  background: white;
-  padding: 16px;
-  border-radius: 20px;
-  box-shadow: 0 10px 25px rgba(0,0,0,.05);
-}
-.card h2 {
-  font-size: 1.5rem;
-  font-weight: 600;
-}
+  .input {
+    width: 100%;
+    padding: 14px;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+  }
+  .btn {
+    background: #6366f1;
+    color: white;
+    padding: 14px;
+    border-radius: 18px;
+    font-weight: 500;
+  }
+  .card {
+    background: white;
+    padding: 16px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.05);
+  }
+  .card h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
 </style>
 
 </body>
 </html>
-
-
-
-
