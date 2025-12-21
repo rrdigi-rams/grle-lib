@@ -21,9 +21,16 @@
 
 <body class="bg-gray-100 min-h-screen">
 
+<h1 class="text-center text-white text-2xl font-semibold mb-6">
+  Community Library
+</h1>
+<p class="text-center text-indigo-100 mb-8">
+  Admin access for managing books & members
+</p>
+  
 <!-- LOGIN -->
-<div id="loginScreen" class="flex items-center justify-center min-h-screen p-4">
-  <div class="bg-white p-6 rounded-2xl shadow w-full max-w-sm">
+<div id="loginScreen" class="bg-gradient-to-br from-indigo-600 to-purple-600 py-16 px-4">
+<div class="bg-white/95 backdrop-blur p-6 rounded-2xl shadow-xl w-full max-w-sm mx-auto">
     <h2 class="text-xl font-semibold text-center mb-4">Admin Login</h2>
     <input id="email" class="input" placeholder="Email">
     <input id="password" type="password" class="input" placeholder="Password">
@@ -34,6 +41,10 @@
   </div>
 </div>
 
+<div class="bg-gray-100 py-6 text-center text-gray-500 text-sm">
+  📚 Browse available books below
+</div>
+  
 <!-- APP -->
 <div id="app">
 
@@ -45,7 +56,7 @@
   </div>
 </div>
 
-<div class="max-w-6xl mx-auto p-4 space-y-6">
+<div class="max-w-6xl mx-auto p-4 space-y-4">
 
 <!-- DASHBOARD -->
 <div id="adminDashboard" class="grid grid-cols-2 gap-4 md:grid-cols-4 hidden">
@@ -131,5 +142,6 @@
 
 </body>
 </html>
+
 
 
