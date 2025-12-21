@@ -35,7 +35,7 @@
 </div>
 
 <!-- APP -->
-<div id="app" class="hidden">
+<div id="app">
 
 <!-- HEADER -->
 <div class="bg-white sticky top-0 shadow">
@@ -48,7 +48,7 @@
 <div class="max-w-6xl mx-auto p-4 space-y-6">
 
 <!-- DASHBOARD -->
-<div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+<div id="adminDashboard" class="grid grid-cols-2 gap-4 md:grid-cols-4 hidden">
   <div class="card"><p>Total Books</p><h2 id="totalBooks">0</h2></div>
   <div class="card"><p>Available</p><h2 id="availableBooks">0</h2></div>
   <div class="card"><p>Checked Out</p><h2 id="checkedOutBooks">0</h2></div>
@@ -60,6 +60,8 @@
   class="w-full p-4 rounded-2xl shadow bg-white"
   placeholder="🔍 Search books">
 
+<div id="adminControls" class="hidden space-y-6">
+ 
 <!-- ADD USER -->
 <div class="bg-white p-4 rounded-2xl shadow space-y-3">
   <h2 class="font-semibold">👤 Add Member</h2>
@@ -76,7 +78,9 @@
   <input id="bauthor" class="input" placeholder="Author">
   <input id="bcategory" class="input" placeholder="Category">
   <input id="bowner" class="input" placeholder="Donated By / Library">
+</div>
 
+  
   <!-- MOBILE CAMERA FRIENDLY -->
   <input
     type="file"
@@ -124,3 +128,4 @@
 
 </body>
 </html>
+
