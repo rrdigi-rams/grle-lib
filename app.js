@@ -1,9 +1,17 @@
 /* ---------- AUTH ---------- */
 
 auth.onAuthStateChanged(user => {
-  loginScreen.classList.toggle("hidden", !!user);
-  app.classList.toggle("hidden", !user);
+  if (user) {
+    loginScreen.classList.add("hidden");
+    adminDashboard.classList.remove("hidden");
+    adminControls.classList.remove("hidden");
+  } else {
+    loginScreen.classList.remove("hidden");
+    adminDashboard.classList.add("hidden");
+    adminControls.classList.add("hidden");
+  }
 });
+
 
 function login() {
   auth.signInWithEmailAndPassword(email.value, password.value)
@@ -155,6 +163,38 @@ db.collection("books").onSnapshot(snapshot => {
   renderBooks(allBooks);
 });
 
-db.collection("users").onSnapshot(snap => {
-  totalUsers.innerText = snap.size;
+db.collection("users").onSnapshot(snapshot => {
+  const users = [];
+  snapshot.forEach(doc => {
+    const u = doc.data();
+    u.id = doc.id;
+    users.push(u);
+  });
+
+  totalUsers.innerText = users.length;
+  renderUsers(users);
 });
+
+
+function renderUsers(users) {
+  userList.innerHTML = "";
+  users.forEach(u => {
+    userList.innerHTML += `
+      <div class="p-3 flex justify-between items-center">
+        <div>
+          <p class="font-medium">${u.name}</p>
+          <p class="text-sm text-gray-500">${u.phone} • Flat ${u.flat}</p>
+        </div>
+        <button onclick="deleteUser('${u.id}')" class="text-red-500 text-sm">
+          Delete
+        </button>
+      </div>
+    `;
+  });
+}
+
+function deleteUser(id) {
+  if (confirm("Delete this user?")) {
+    db.collection("users").doc(id).delete();
+  }
+}
